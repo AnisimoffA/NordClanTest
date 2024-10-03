@@ -19,7 +19,10 @@ async def get_events(AsyncSession = Depends(get_async_session)):
 
 
 @router_events.post("/events")
-async def create_event(event: EventCreate, AsyncSession = Depends(get_async_session)):
+async def create_event(
+        event: EventCreate,
+        AsyncSession = Depends(get_async_session)
+):
     deadline = EventMethods.to_utc_time(event.deadline)
     new_event = Event(title=event.title, deadline=deadline)
     AsyncSession.add(new_event)
@@ -29,14 +32,19 @@ async def create_event(event: EventCreate, AsyncSession = Depends(get_async_sess
         await AsyncSession.refresh(new_event)
     except IntegrityError:
         await AsyncSession.rollback()
-        raise HTTPException(status_code=400, detail="Ошибка при добавлении события")
-
+        raise HTTPException(
+            status_code=400,
+            detail="Ошибка при добавлении события"
+        )
     return new_event
 
 
 @router_events.get("/events/{event_id}")
 async def get_event(event_id: int, AsyncSession = Depends(get_async_session)):
-    result = await AsyncSession.execute(select(Event).where(Event.id == event_id))
+    result = await AsyncSession.execute(
+        select(Event).
+        where(Event.id == event_id)
+    )
     event = result.scalars().first()
 
     if event is None:

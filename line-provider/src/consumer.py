@@ -28,7 +28,7 @@ async def consume():
                             else EventStatus.LOW_SCORE
                         await update_event_status(event_id, event_status)
 
-                    except Exception as e:
+                    except Exception:
                         row_id = message['data']['row_id']
                         await send(message={
                             "data": {"row_id": row_id},

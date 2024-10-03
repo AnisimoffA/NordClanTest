@@ -10,6 +10,7 @@ router_producer = APIRouter(
     tags=["Producer"]
 )
 
+
 @router_producer.post('/create_message')
 async def send(message):
     producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS)
