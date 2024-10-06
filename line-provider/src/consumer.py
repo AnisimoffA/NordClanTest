@@ -16,6 +16,7 @@ async def consume():
     try:
         async for msg in consumer:
             message = json.loads(msg.value.decode('utf-8'))
+            print("было получено новое сообщение", message)
             event = message['event']
             status = message['status']
 

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -20,3 +21,10 @@ class EventCreate(BaseModel):
     title: str
     deadline: datetime
     status: EventStatus = EventStatus.IN_PROGRESS
+
+
+class KafkaEvent(BaseModel):
+    data: Optional[dict]
+    event: str
+    status: str
+
