@@ -1,4 +1,4 @@
-import aioredis
+from redis import asyncio as aioredis
 from dotenv import load_dotenv
 import os
 from sqlalchemy import MetaData
@@ -6,7 +6,7 @@ import asyncio
 
 
 loop = asyncio.get_event_loop()
-load_dotenv()
+load_dotenv('.env.prod')
 
 # для основной бд
 DB_HOST = os.getenv("DB_HOST")

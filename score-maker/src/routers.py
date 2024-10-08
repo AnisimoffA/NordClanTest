@@ -1,11 +1,9 @@
-import json
 from asyncio import sleep
-from .config import REDIS_PORT, REDIS_HOST
-import aioredis
-from .main import redis
-from fastapi import APIRouter, HTTPException, Depends
+import json
+from fastapi import APIRouter, Request
 from .schemas import Score, KafkaEvent
 from datetime import datetime, timezone
+import time
 from .utils import (EventUsefulMethods,
                     EventRemoteMethods,
                     ScoreDBMethods,
@@ -18,26 +16,21 @@ router_events = APIRouter(tags=["Score-maker"])
 
 
 @router_events.get("/events")
-async def get_events():
-    cache_key = "events_cache"
-    cached_events = await redis.get(cache_key)
+async def get_events(request: Request):
+    redis = request.app.state.redis
+    events = redis.get("valid_events")
 
-    if cached_events:
-        # Если данные есть в кеше, возвращаем их
-        return json.loads(cached_events)
-    await sleep(5)
-    # Если данных нет в кеше, получаем их из базы данных
-    events = await EventRemoteMethods.get_all_events()
-    valid_events = [
-        event for event in events
-        if EventUsefulMethods.to_utc_time(event["deadline"])
-           > datetime.now(timezone.utc)
-    ]
-
-    # Сохраняем результат в Redis с TTL 30 минут (1800 секунд)
-    await redis.setex(cache_key, 1800, json.dumps(valid_events))
-
-    return valid_events
+    if events is None:
+        events = await EventRemoteMethods.get_all_events()
+        valid_events = [
+            event for event in events
+            if EventUsefulMethods.to_utc_time(event["deadline"])
+               > datetime.now(timezone.utc)
+        ]
+        redis.set("valid_events", json.dumps(valid_events), ex=1800)
+    else:
+        events = json.loads(events)
+    return events
 
 
 @router_events.get("/scores")

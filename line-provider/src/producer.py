@@ -20,5 +20,6 @@ async def send(message):
         await producer.send_and_wait(
             topic=KAFKA_TOPIC_SCORE_MAKER,
             value=value_json)
+        print("сообщение успешно отправлено")
     finally:
         await producer.stop()
