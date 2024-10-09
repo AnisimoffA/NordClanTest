@@ -89,7 +89,7 @@ class KafkaMethods:
 
                 new_event = OutboxMessageModel(
                     occurred_on=datetime.now(timezone.utc),
-                    status="в процессе",
+                    status="in process",
                     data=json.dumps(data.dict())
                 )
                 session.add(new_event)

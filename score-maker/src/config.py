@@ -6,7 +6,7 @@ import asyncio
 
 
 loop = asyncio.get_event_loop()
-load_dotenv('.env.dev')
+load_dotenv('.env.prod')
 
 # для основной бд
 DB_HOST = os.getenv("DB_HOST")

@@ -84,7 +84,7 @@ class ScoreDBMethods:
 
                 new_event = OutboxMessageModel(
                     occurred_on=datetime.now(timezone.utc),
-                    status="в процессе",
+                    status="in process",
                     data=json.dumps(data.dict())
                 )
                 session.add(new_event)
@@ -107,7 +107,6 @@ class ScoreDBMethods:
             # Проверяем, что запись найдена
             if score_row is None:
                 print(f"No score found with id: {row_id}")
-                return
             await session.delete(score_row)
             await session.commit()
 

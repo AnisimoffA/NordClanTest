@@ -28,7 +28,7 @@ async def send_events_to_kafka():
         async with await get_session() as session:
             result = await session.execute(
                 select(OutboxMessageModel).
-                where(OutboxMessageModel.status == 'в процессе')
+                where(OutboxMessageModel.status == 'in process')
             )
             events = result.scalars().all()
             for event in events:
@@ -37,7 +37,7 @@ async def send_events_to_kafka():
                     topic=KAFKA_TOPIC_SCORE_MAKER,
                     value=json_data
                 )
-                event.status = 'успешно выполнено'
+                event.status = 'successfully sent'
                 event.processed_on = datetime.now(timezone.utc)
                 await session.commit()
     finally:

@@ -49,7 +49,7 @@ services:
     ports:
       - "1000:5432"
     volumes:
-      - db1_data:/var/lib/postgresql/data
+      - database1_data:/var/lib/postgresql/data
 
   db-sm:
     image: postgres
@@ -62,7 +62,7 @@ services:
     ports:
       - "2000:5432"
     volumes:
-      - db2_data:/var/lib/postgresql/data
+      - database2_data:/var/lib/postgresql/data
 
   kafka-ui:
     container_name: kafka-ui
@@ -124,6 +124,6 @@ networks:
     driver: bridge
 
 volumes:
-  db1_data:
-  db2_data:
+  database1_data:
+  database2_data:
   redis_data:

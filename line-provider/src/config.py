@@ -6,7 +6,7 @@ from sqlalchemy import MetaData
 metadata = MetaData()
 
 loop = asyncio.get_event_loop()
-load_dotenv('.env.dev')
+load_dotenv('.env.prod')
 
 KAFKA_TOPIC_SCORE_MAKER = os.getenv('KAFKA_TOPIC_SCORE_MAKER')
 KAFKA_TOPIC_LINE_PROVIDER = os.getenv('KAFKA_TOPIC_LINE_PROVIDER')
