@@ -1,18 +1,19 @@
-import aiohttp
+import json
 from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
 from sqlalchemy import select
 from .database import async_session_maker
-from .models import Event
-from .schemas import EventStatus, EventCreate
+from .models import Event, OutboxMessageModel
+from .schemas import EventStatus, EventCreate, KafkaEvent
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class EventUsefulMethods:
     @staticmethod
     def to_utc_time(current_deadline):
-        correct_deadline = current_deadline.astimezone(timezone.utc).replace(tzinfo=None)
+        correct_deadline = (current_deadline.
+                            astimezone(timezone.utc).replace(tzinfo=None))
         return correct_deadline
 
 
@@ -40,7 +41,9 @@ class EventDBMethods:
             event = result.scalars().first()
 
             if event is None:
-                raise HTTPException(status_code=404, detail="Событие не найдено")
+                raise HTTPException(
+                    status_code=404,
+                    detail="Событие не найдено")
             return event
 
     @staticmethod
@@ -69,3 +72,27 @@ class EventDBMethods:
                     status_code=400,
                     detail="Ошибка при добавлении события"
                 )
+
+
+class KafkaMethods:
+    @staticmethod
+    async def send_score_update_error_message(row_id):
+        async with await EventDBMethods._get_session() as session:
+            try:
+                data = KafkaEvent(
+                    data={
+                        "row_id": row_id
+                    },
+                    event="score_update",
+                    status="error"
+                )
+
+                new_event = OutboxMessageModel(
+                    occurred_on=datetime.now(timezone.utc),
+                    status="в процессе",
+                    data=json.dumps(data.dict())
+                )
+                session.add(new_event)
+                await session.commit()
+            except Exception:
+                await session.rollback()

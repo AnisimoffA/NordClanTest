@@ -1,15 +1,12 @@
-from asyncio import sleep
 import json
 from fastapi import APIRouter, Request
-from .schemas import Score, KafkaEvent
+from .schemas import Score
 from datetime import datetime, timezone
-import time
 from .utils import (EventUsefulMethods,
                     EventRemoteMethods,
                     ScoreDBMethods,
                     ScoreMethods,
                     EventValidator)
-from .producer import send
 
 
 router_events = APIRouter(tags=["Score-maker"])
@@ -55,41 +52,4 @@ async def set_score(score: Score):
 
     EventValidator.validate_deadline(deadline)
 
-    try:
-        row_id = await ScoreDBMethods.insert_into_score(
-            score.event_id,
-            score.score
-        )
-        message = KafkaEvent(
-            data={
-                "event_id": score.event_id,
-                "event_score": score.score,
-                "row_id": row_id
-            },
-            event="score_insert_into_db",
-            status="success"
-        )
-        await send(message.dict())
-        return {"score_id": score.event_id, "status": "Создано"}
-    except Exception as e:
-        message = KafkaEvent(
-            data=None,
-            event="score_insert_into_db",
-            status="error"
-        )
-        await send(message.dict())
-        return HTTPException(status_code=400, detail=e)
-
-
-@router_events.get("/kafka-test")
-async def kafka_test():
-    try:
-        message = KafkaEvent(
-            data=None,
-            event="test",
-            status="success"
-        )
-        await send(message.dict())
-        return {"status": "success", "info": "все успешно отправлено"}
-    except Exception as e:
-        return {"status": "error", "error": str(e)}
+    return await ScoreDBMethods.insert_into_score(score.event_id, score.score)

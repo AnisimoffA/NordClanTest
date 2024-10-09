@@ -27,4 +27,3 @@ class KafkaEvent(BaseModel):
     data: Optional[dict]
     event: str
     status: str
-

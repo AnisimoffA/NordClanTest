@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 from .utils import EventUsefulMethods, EventDBMethods
-from .schemas import EventStatus, EventCreate, KafkaEvent
-from .producer import send
+from .schemas import EventStatus, EventCreate
 
 
 router_events = APIRouter(tags=["Line-provider"])
+
 
 @router_events.get("/events")
 async def get_events():
@@ -29,17 +29,3 @@ async def get_event(event_id: int):
 async def update_event_status(event_id: int, status: EventStatus):
     await EventDBMethods.update_event_status(event_id, status)
     return {"status": "Статус обновлено"}
-
-
-@router_events.get("/kafka-test")
-async def kafka_test():
-    try:
-        message = KafkaEvent(
-            data=None,
-            event="test",
-            status="success"
-        )
-        await send(message.dict())
-        return {"status": "success", "info": "все успешно отправлено"}
-    except Exception as e:
-        return {"status": "error", "error": str(e)}
